@@ -14,7 +14,10 @@ abstract class LocalDatasource {
   Future<void> deleteTasks({required String categoryTitle, required String taskTitle});
   Future<List<CategoryModel>> fetchAllTasks();
   Future<void> updateTask({required String categoryTitle, required String oldTaskTitle, required String update});
-  Future<void> markTaskAsComplete({required String categoryTitle, required String taskTitle,}); 
+  Future<void> markTaskAsComplete({
+    required String categoryTitle,
+    required String taskTitle,
+  });
 }
 
 class LocalDatasourceImpl implements LocalDatasource {
@@ -35,7 +38,9 @@ class LocalDatasourceImpl implements LocalDatasource {
       final key = categoryTitle.replaceAll(" ", "");
       final existingCategory = await hiveService.readItem(key, HiveBoxNames.categories.name) as CategoryModel?;
       if (existingCategory != null) {
-        final updatedCategory = existingCategory.tasks.add(TaskModel(uid: user!.uid, title: taskTitle));
+        final updatedCategory = existingCategory.tasks.add(
+          TaskModel(uid: user!.uid, title: taskTitle, completed: false),
+        );
         await hiveService.saveItem(updatedCategory, HiveBoxNames.categories.name, key: key);
       } else {
         await hiveService.saveItem(
@@ -44,6 +49,7 @@ class LocalDatasourceImpl implements LocalDatasource {
               title: taskTitle,
               uid: user.uid,
               description: description,
+              completed: false,
             )
           ]),
           HiveBoxNames.categories.name,
@@ -99,7 +105,11 @@ class LocalDatasourceImpl implements LocalDatasource {
       }
       final taskIndex = existingCategory.tasks.indexWhere((e) => e.title == oldTaskTitle);
       if (taskIndex >= 0) {
-        existingCategory.tasks[taskIndex] = TaskModel(uid: user!.uid, title: update);
+        existingCategory.tasks[taskIndex] = TaskModel(
+          uid: user!.uid,
+          title: update,
+          completed: existingCategory.tasks[taskIndex].completed,
+        );
       } else {
         throw ApiFailure("Task not found");
       }
@@ -113,11 +123,30 @@ class LocalDatasourceImpl implements LocalDatasource {
   }
 
   @override
-   Future<void> markTaskAsComplete({required String categoryTitle, required String taskTitle,})async {
-    try { 
-
-    } catch (e){
-
+  Future<void> markTaskAsComplete({
+    required String categoryTitle,
+    required String taskTitle,
+  }) async {
+    try {
+      final key = categoryTitle.replaceAll(" ", "");
+      final existingCategory = await hiveService.readItem(key, HiveBoxNames.categories.name) as CategoryModel?;
+      if (existingCategory == null) {
+        throw ApiFailure("Category not found");
+      }
+      final taskIndex = existingCategory.tasks.indexWhere((e) => e.title == taskTitle);
+      if (taskIndex >= 0) {
+        existingCategory.tasks[taskIndex] = TaskModel(
+          uid: existingCategory.tasks[taskIndex].uid,
+          title: existingCategory.tasks[taskIndex].title,
+          completed: true,
+        );
+      } else {
+        throw ApiFailure("Task not found");
+      }
+      await hiveService.saveItem(existingCategory, HiveBoxNames.categories.name, key: key);
+      return;
+    } catch (e) {
+      throw ApiFailure(e.toString());
     }
-   }
+  }
 }

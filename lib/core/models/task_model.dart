@@ -22,8 +22,6 @@ class TaskModel {
     this.description,
   });
 
-  factory TaskModel.fromJson(Map<String, dynamic> json) => TaskModel(
-        uid: json["uid"],
-        title: json["title"],
-      );
+  factory TaskModel.fromJson(Map<String, dynamic> json) =>
+      TaskModel(uid: json["uid"], title: json["title"], completed: json["completed"]);
 }
