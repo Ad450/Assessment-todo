@@ -1,3 +1,4 @@
+import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
 import "package:flutter_screenutil/flutter_screenutil.dart";
@@ -5,7 +6,10 @@ import "package:flutter_svg/svg.dart";
 import "package:todo/core/app/app_theme.dart";
 import "package:todo/core/presentation/widgets/button.dart";
 import "package:todo/core/presentation/widgets/todo_textfield.dart";
+import "package:todo/core/utils/helper_functions.dart";
 import "package:todo/features/home/tasks/screens/tasks.dart";
+import "package:todo/features/onboarding/auth/state/signup_event.dart";
+import "package:todo/features/onboarding/auth/state/signup_state.dart";
 
 import "../../../../core/app/app_assets.dart";
 import "../../../../core/app/app_locator.dart";
@@ -42,26 +46,48 @@ class EmailSignup extends StatelessWidget {
             hintText: "enter password",
             borderRadius: 15,
           ),
-          TodoButton(
-              height: 60.h,
-              onPressed: () {
+          BlocConsumer<SignupBloc, SignupState>(
+            listener: (_, state) {
+              if (state is SignupStateError) {
+                showToast(state.message);
+              }
+              if (state is SignupStateSuccessfulState) {
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => const TasksScreen(),
-                  ),
+                  MaterialPageRoute(builder: (_) => const TasksScreen()),
                   (route) => false,
                 );
-              },
-              buttonStyle: ButtonStyle(
-                backgroundColor: MaterialStatePropertyAll<Color>(theme.colorScheme.onPrimary),
-              ),
-              child: Text(
-                'Continue',
-                style: TextStyle(
-                  color: locator.get<AppTheme>().genericWhiteColor,
-                ),
-              ))
+              }
+            },
+            builder: (_, state) {
+              if (state is SignupLoading) {
+                return const CupertinoActivityIndicator();
+              } else {
+                return TodoButton(
+                    height: 60.h,
+                    onPressed: () {
+                      final password = context.read<SignupBloc>().passwordController;
+                      final email = context.read<SignupBloc>().emailController;
+
+                      if (password.text.isEmpty || email.text.isEmpty) {
+                        showToast("Enter email or password");
+                        return;
+                      } else {
+                        context.read<SignupBloc>().add(SignupWithPasswordEvent());
+                      }
+                    },
+                    buttonStyle: ButtonStyle(
+                      backgroundColor: MaterialStatePropertyAll<Color>(theme.colorScheme.onPrimary),
+                    ),
+                    child: Text(
+                      'Continue',
+                      style: TextStyle(
+                        color: locator.get<AppTheme>().genericWhiteColor,
+                      ),
+                    ));
+              }
+            },
+          )
         ],
       ),
     ));
