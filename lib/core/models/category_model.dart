@@ -1,9 +1,10 @@
+import 'package:equatable/equatable.dart';
 import 'package:hive/hive.dart';
 import 'package:todo/core/models/task_model.dart';
 part 'category_model.g.dart';
 
 @HiveType(typeId: 1)
-class CategoryModel {
+class CategoryModel extends Equatable {
   @HiveField(0)
   final String uid;
 
@@ -12,6 +13,9 @@ class CategoryModel {
 
   @HiveField(2)
   final List<TaskModel> tasks;
+
+  @override
+  List<Object> get props => [uid, title, tasks];
 
   CategoryModel({
     required this.uid,
