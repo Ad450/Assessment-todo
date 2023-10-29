@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logger/logger.dart';
 import 'package:todo/core/app/app_assets.dart';
@@ -53,7 +54,7 @@ void setupLocator() {
   );
 
   locator.registerLazySingleton<TasksLocalDatasource>(
-    () => TasksLocalDatasourceImpl(locator.get<HiveService>()),
+    () => TasksLocalDatasourceImpl(locator.get<HiveService>(), FirebaseAuth.instance.currentUser),
   );
 
   locator.registerLazySingleton<TasksRepository>(

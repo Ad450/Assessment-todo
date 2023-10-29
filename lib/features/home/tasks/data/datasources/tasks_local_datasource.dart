@@ -24,8 +24,8 @@ abstract class TasksLocalDatasource {
 
 class TasksLocalDatasourceImpl implements TasksLocalDatasource {
   final HiveService hiveService;
-
-  TasksLocalDatasourceImpl(this.hiveService);
+  final User? currentUser;
+  TasksLocalDatasourceImpl(this.hiveService, this.currentUser);
   @override
   Future<void> addTasks({
     required String categoryTitle,
@@ -33,8 +33,8 @@ class TasksLocalDatasourceImpl implements TasksLocalDatasource {
     String? description,
   }) async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user?.uid == null) {
+      // final user = FirebaseAuth.instance.currentUser;
+      if (currentUser?.uid == null) {
         throw ApiFailure("No user found");
       }
       final key = categoryTitle.replaceAll(" ", "");
@@ -42,17 +42,17 @@ class TasksLocalDatasourceImpl implements TasksLocalDatasource {
       if (existingCategory != null) {
         debugPrint("found existing");
         final updatedCategory = CategoryModel(
-          uid: user!.uid,
+          uid: currentUser!.uid,
           title: categoryTitle,
-          tasks: [...existingCategory.tasks, TaskModel(uid: user.uid, title: taskTitle, completed: false)],
+          tasks: [...existingCategory.tasks, TaskModel(uid: currentUser!.uid, title: taskTitle, completed: false)],
         );
         await hiveService.saveItem(updatedCategory, HiveBoxNames.categories.name, key: key);
       } else {
         await hiveService.saveItem(
-          CategoryModel(uid: user!.uid, title: categoryTitle, tasks: <TaskModel>[
+          CategoryModel(uid: currentUser!.uid, title: categoryTitle, tasks: <TaskModel>[
             TaskModel(
               title: taskTitle,
-              uid: user.uid,
+              uid: currentUser!.uid,
               description: description,
               completed: false,
             )
@@ -83,7 +83,6 @@ class TasksLocalDatasourceImpl implements TasksLocalDatasource {
     } on ApiFailure catch (e) {
       throw ApiFailure(e.message);
     } catch (e) {
-      print(".............${(e as ApiFailure).message}............");
       throw ApiFailure(e.toString());
     }
   }
@@ -105,8 +104,8 @@ class TasksLocalDatasourceImpl implements TasksLocalDatasource {
     required String update,
   }) async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user?.uid == null) {
+      // final user = FirebaseAuth.instance.currentUser;
+      if (currentUser?.uid == null) {
         throw ApiFailure("No user found");
       }
 
@@ -118,7 +117,7 @@ class TasksLocalDatasourceImpl implements TasksLocalDatasource {
       final taskIndex = existingCategory.tasks.indexWhere((e) => e.title == oldTaskTitle);
       if (taskIndex >= 0) {
         existingCategory.tasks[taskIndex] = TaskModel(
-          uid: user!.uid,
+          uid: currentUser!.uid,
           title: update,
           completed: existingCategory.tasks[taskIndex].completed,
         );
