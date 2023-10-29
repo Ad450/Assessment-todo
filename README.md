@@ -1,16 +1,12 @@
-# todo
+A simple Todo App
+Our Simple ToDo App has a clear data flow that ensures data moves consistently through the application:
 
-A new Flutter project.
+Data Sources: Data sources are responsible for interacting with external services or databases. They provide raw data to the application.
 
-## Getting Started
+Repositories: Repositories act as an abstraction layer between data sources and use cases. They decide from which data source to fetch data and handle data transformation.
 
-This project is a starting point for a Flutter application.
+Use Cases: Use cases contain the business logic of the application. They orchestrate data operations by interacting with repositories. Use cases take raw data and format it for use in the UI.
 
-A few resources to get you started if this is your first Flutter project:
+State Management (BLoC): State management is handled by BLoC (Business Logic Component). BLoC manages the application's state and interacts with use cases to fetch and update data.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Presentation (UI): The user interface is built using Flutter, and it listens to the state managed by BLoC. When the state changes, the UI is updated to reflect the new data.
