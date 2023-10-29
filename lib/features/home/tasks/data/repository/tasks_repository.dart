@@ -1,5 +1,3 @@
-import '../../../../../core/models/category_model.dart';
-
 abstract class TasksRepository {
   Future<void> addTasks({
     required String categoryTitle,

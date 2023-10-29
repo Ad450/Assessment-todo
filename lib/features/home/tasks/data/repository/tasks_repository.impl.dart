@@ -1,7 +1,6 @@
 import 'package:todo/core/app/app_usecase.dart';
 import 'package:todo/features/home/tasks/data/repository/tasks_repository.dart';
 
-import '../../../../../core/models/category_model.dart';
 import '../datasources/tasks_local_datasource.dart';
 
 class TasksRepositoryImpl implements TasksRepository {

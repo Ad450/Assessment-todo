@@ -1,7 +1,4 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-
-import '../../../../core/models/category_model.dart';
-
 part 'tasks_state.freezed.dart';
 
 @freezed

@@ -8,7 +8,6 @@ import 'package:todo/core/app/app_theme.dart';
 import 'package:todo/core/presentation/widgets/button.dart';
 import 'package:todo/core/presentation/widgets/todo_textfield.dart';
 import 'package:todo/features/home/tasks/screens/tasks.dart';
-import 'package:todo/features/home/tasks/screens/tile_details.dart';
 import 'package:todo/features/home/tasks/state/tasks_bloc.dart';
 import 'package:todo/features/home/tasks/state/tasks_state.dart';
 
