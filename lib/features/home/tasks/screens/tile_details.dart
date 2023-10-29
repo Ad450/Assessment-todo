@@ -41,7 +41,12 @@ class _TileDetailsState extends State<TileDetails> {
     required ThemeData theme,
   }) {
     return ListTile(
-      title: Text(taskTitle),
+      title: Text(
+        taskTitle,
+        style: TextStyle(
+          color: completed ? locator.get<AppTheme>().genericGrey : Colors.black,
+        ),
+      ),
       onLongPress: () {
         _showBottomSheet(
           theme,
@@ -181,6 +186,14 @@ class _TileDetailsState extends State<TileDetails> {
                         if (mounted) {
                           showToast(state.message);
                         }
+                        return;
+                      },
+                      markAsCompleteSuccess: (_) {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (_) => const TasksScreen()),
+                          (route) => false,
+                        );
                         return;
                       },
                       deleteTaskSuccess: (_) => Navigator.pushAndRemoveUntil(
