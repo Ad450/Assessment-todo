@@ -19,7 +19,6 @@ abstract class TasksLocalDatasource {
     required String categoryTitle,
     required String taskTitle,
   });
-  Future<void> deleteDummy();
 }
 
 class TasksLocalDatasourceImpl implements TasksLocalDatasource {
@@ -159,11 +158,5 @@ class TasksLocalDatasourceImpl implements TasksLocalDatasource {
     } catch (e) {
       throw ApiFailure(e.toString());
     }
-  }
-
-  @override
-  Future<void> deleteDummy() async {
-    await hiveService.deleteAll(HiveBoxNames.categories.name);
-    return;
   }
 }
