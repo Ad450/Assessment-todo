@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:todo/core/utils/helper_functions.dart';
-import 'package:todo/features/home/tasks/screens/add_tasks.dart';
+import 'package:todo/features/home/tasks/screens/tasks.dart';
 import 'package:todo/features/home/tasks/state/task_events.dart';
 import 'package:todo/features/home/tasks/state/tasks_bloc.dart';
 import 'package:todo/features/home/tasks/state/tasks_state.dart';
@@ -31,10 +31,52 @@ class TileDetails extends StatefulWidget {
 
 class _TileDetailsState extends State<TileDetails> {
   bool isCompleted = false;
+  GlobalKey<AnimatedListState> listKey = GlobalKey();
 
-  Widget _buildTile({required categoryTitle, required String taskTitle, required bool completed}) {
+  Widget _buildTile({
+    required categoryTitle,
+    required String taskTitle,
+    required oldTaskTitle,
+    required bool completed,
+    required ThemeData theme,
+  }) {
     return ListTile(
       title: Text(taskTitle),
+      onLongPress: () {
+        _showBottomSheet(
+          theme,
+          isUpdate: true,
+          button: BlocListener<TasksBloc, TaskState>(
+            listener: (_, state) => state.maybeMap(
+              orElse: () => {},
+              updateTaskError: (state) => showToast(state.message),
+              updateTaskSuccess: (state) {
+                context.read<TasksBloc>().add(FetchTaskEvent());
+                Navigator.pop(context);
+                return;
+              },
+            ),
+            child: TodoButton(
+              onPressed: () {
+                context.read<TasksBloc>().add(
+                      UpdateTaskEvent(categoryTitle: categoryTitle, oldTitle: oldTaskTitle),
+                    );
+                Navigator.pop(context);
+              },
+              buttonStyle: ButtonStyle(
+                backgroundColor: MaterialStatePropertyAll<Color>(locator.get<AppTheme>().genericBlackColor),
+              ),
+              height: 60.h,
+              child: Text(
+                "Update",
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: locator.get<AppTheme>().genericWhiteColor,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
       leading: Checkbox(
         value: completed ? true : isCompleted,
         onChanged: (value) {
@@ -109,7 +151,7 @@ class _TileDetailsState extends State<TileDetails> {
               top: 10.h,
             ),
             child: Text(
-              "Your uncompleted todos",
+              "Your todos",
               style: theme.textTheme.bodySmall?.copyWith(fontSize: 14),
             ),
           ),
@@ -126,47 +168,61 @@ class _TileDetailsState extends State<TileDetails> {
                 deleteTaskSuccess: (state) => showToast("Tasks deleted Successfully"),
               ),
               child: ListView.builder(
+                key: listKey,
                 itemCount: widget.category.tasks.length,
-                itemBuilder: (_, i) => Slidable(
-                    key: const ValueKey(0),
-                    startActionPane: ActionPane(
-                      motion: const ScrollMotion(),
-                      dismissible: DismissiblePane(onDismissed: () {
-                        context.read<TasksBloc>().add(DeleteTaskEvent());
-                      }),
-                      children: [
-                        SlidableAction(
-                          onPressed: (context) {
-                            context.read<TasksBloc>().add(DeleteTaskEvent());
-                          },
-                          backgroundColor: theme.colorScheme.onPrimary,
-                          foregroundColor: Colors.white,
-                          icon: Icons.delete,
-                          label: 'Delete',
-                        ),
-                      ],
+                itemBuilder: (_, i) {
+                  if (i >= widget.category.tasks.length) {
+                    return const SizedBox();
+                  }
+                  return BlocListener<TasksBloc, TaskState>(
+                    listener: (_, state) => state.maybeMap(
+                      orElse: () => {},
+                      markAsCompleteError: (state) {
+                        if (mounted) {
+                          showToast(state.message);
+                        }
+                        return;
+                      },
+                      deleteTaskSuccess: (_) => Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (_) => const TasksScreen()),
+                        (route) => false,
+                      ),
                     ),
-                    child: BlocConsumer<TasksBloc, TaskState>(
-                      listener: (_, state) => state.maybeMap(
-                          orElse: () => {},
-                          markAsCompleteError: (state) {
-                            if (mounted) {
-                              showToast(state.message);
-                            }
-                            return;
-                          }),
-                      builder: (_, state) => state.maybeMap(
-                          orElse: () => _buildTile(
-                                taskTitle: widget.category.tasks[i].title,
-                                categoryTitle: widget.category.title,
-                                completed: widget.category.tasks[i].completed,
-                              ),
-                          markAsCompleteSuccess: (_) => _buildTile(
-                                taskTitle: widget.category.tasks[i].title,
-                                categoryTitle: widget.category.title,
-                                completed: widget.category.tasks[i].completed,
-                              )),
-                    )),
+                    child: Slidable(
+                      key: ValueKey(i),
+                      startActionPane: ActionPane(
+                        motion: const ScrollMotion(),
+                        dismissible: DismissiblePane(
+                          onDismissed: () {
+                            context.read<TasksBloc>().add(
+                                  DeleteTaskEvent(
+                                    taskTitle: widget.category.tasks[i].title,
+                                    categoryTitle: widget.category.title,
+                                  ),
+                                );
+                          },
+                        ),
+                        children: [
+                          SlidableAction(
+                            onPressed: (context) {},
+                            backgroundColor: theme.colorScheme.onPrimary,
+                            foregroundColor: Colors.white,
+                            icon: Icons.delete,
+                            label: 'Delete',
+                          ),
+                        ],
+                      ),
+                      child: _buildTile(
+                        taskTitle: widget.category.tasks[i].title,
+                        categoryTitle: widget.category.title,
+                        completed: widget.category.tasks[i].completed,
+                        oldTaskTitle: widget.category.tasks[i].title,
+                        theme: theme,
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ),
@@ -174,52 +230,64 @@ class _TileDetailsState extends State<TileDetails> {
       ),
       floatingActionButton: TodoRoundedIcon(
           onTap: () {
-            showModalBottomSheet(
-              context: context,
-              builder: (_) => SizedBox(
-                //height: 200.h,
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    right: 20.w,
-                    left: 20.w,
-                    top: 30.h,
-                    bottom: MediaQuery.of(context).viewInsets.bottom,
+            _showBottomSheet(theme,
+                isUpdate: false,
+                button: BlocListener<TasksBloc, TaskState>(
+                  listener: (_, state) => state.maybeMap(
+                    orElse: () => {},
+                    addToOldCategoryError: (state) => showToast(state.message),
+                    addToOldCategorySuccess: (state) {
+                      context.read<TasksBloc>().add(FetchTaskEvent());
+                      Navigator.pop(context);
+                      return;
+                    },
                   ),
-                  child: Column(children: [
-                    TodoTextField(
-                      controller: context.read<TasksBloc>().taskTitleController,
-                      keyboardType: TextInputType.text,
-                      hintText: "todo title",
+                  child: TodoButton(
+                    onPressed: () {
+                      context.read<TasksBloc>().add(AddToOldCategoryEvent(widget.category.title));
+                      Navigator.pop(context);
+                    },
+                    buttonStyle: ButtonStyle(
+                      backgroundColor: MaterialStatePropertyAll<Color>(locator.get<AppTheme>().genericBlackColor),
                     ),
-                    BlocListener<TasksBloc, TaskState>(
-                      listener: (_, state) => state.maybeMap(
-                        orElse: () {},
-                        addToOldCategoryError: (state) => showToast(state.message),
-                        addToOldCategorySuccess: (state) => context.read<TasksBloc>().add(FetchTaskEvent()),
+                    height: 60.h,
+                    child: Text(
+                      "create",
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: locator.get<AppTheme>().genericWhiteColor,
                       ),
-                      child: TodoButton(
-                        onPressed: () {
-                          context.read<TasksBloc>().add(AddToOldCategoryEvent(widget.category.title));
-                          Navigator.pop(context);
-                        },
-                        buttonStyle: ButtonStyle(
-                          backgroundColor: MaterialStatePropertyAll<Color>(locator.get<AppTheme>().genericBlackColor),
-                        ),
-                        height: 60.h,
-                        child: Text(
-                          "create",
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            color: locator.get<AppTheme>().genericWhiteColor,
-                          ),
-                        ),
-                      ),
-                    )
-                  ]),
-                ),
-              ),
-            );
+                    ),
+                  ),
+                ));
           },
           icon: const FaIcon(FontAwesomeIcons.plus)),
+    );
+  }
+
+  Future<void> _showBottomSheet(ThemeData theme, {required Widget button, required bool isUpdate}) {
+    return showModalBottomSheet(
+      context: context,
+      builder: (_) => SizedBox(
+        //height: 200.h,
+        child: Padding(
+          padding: EdgeInsets.only(
+            right: 20.w,
+            left: 20.w,
+            top: 30.h,
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Column(children: [
+            TodoTextField(
+              controller: isUpdate
+                  ? context.read<TasksBloc>().updatedTitleController
+                  : context.read<TasksBloc>().taskTitleController,
+              keyboardType: TextInputType.text,
+              hintText: "todo title",
+            ),
+            button,
+          ]),
+        ),
+      ),
     );
   }
 }

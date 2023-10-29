@@ -19,7 +19,7 @@ class TodoTasksTile extends StatelessWidget {
       onTap: tileTapped,
       child: Container(
         width: double.infinity,
-        height: 310.h,
+        height: 280.h,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(25),
           gradient: LinearGradient(

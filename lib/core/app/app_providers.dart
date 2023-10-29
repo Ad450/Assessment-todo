@@ -7,6 +7,7 @@ import 'package:todo/features/home/tasks/data/usecases/fetch_tasks.dart';
 import 'package:todo/features/home/tasks/data/usecases/mark_task_as_complete.dart';
 import 'package:todo/features/home/tasks/data/usecases/update_task.dart';
 import 'package:todo/features/home/tasks/state/tasks_bloc.dart';
+import 'package:todo/features/onboarding/auth/data/usecases/logout.dart';
 import 'package:todo/features/onboarding/auth/data/usecases/signup_with_google.dart';
 import 'package:todo/features/onboarding/auth/data/usecases/singup_with_password.dart';
 import 'package:todo/features/onboarding/auth/state/auth_events.dart';
@@ -24,7 +25,10 @@ final signupBloc = BlocProvider(
 );
 
 final authBloc = BlocProvider(
-  create: (_) => AuthBloc(checkAuthStatus: locator.get<CheckAuthStatus>())..add(OnAppStarted()),
+  create: (_) => AuthBloc(
+    checkAuthStatus: locator.get<CheckAuthStatus>(),
+    logout: locator.get<Logout>(),
+  )..add(OnAppStarted()),
 );
 
 final taskBloc = BlocProvider(

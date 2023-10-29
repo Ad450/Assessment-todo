@@ -5,11 +5,17 @@ class AddTaskEvent extends TaskEvent {
   AddTaskEvent(this.hasCategory);
 }
 
-class DeleteTaskEvent extends TaskEvent {}
+class DeleteTaskEvent extends TaskEvent {
+  final String categoryTitle;
+  final String taskTitle;
+
+  DeleteTaskEvent({required this.categoryTitle, required this.taskTitle});
+}
 
 class UpdateTaskEvent extends TaskEvent {
+  final String categoryTitle;
   final String oldTitle;
-  UpdateTaskEvent(this.oldTitle);
+  UpdateTaskEvent({required this.categoryTitle, required this.oldTitle});
 }
 
 class MarkTaskAsCompleteEvent extends TaskEvent {

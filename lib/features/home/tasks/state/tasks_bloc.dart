@@ -68,8 +68,8 @@ class TasksBloc extends Bloc<TaskEvent, TaskState> {
   Future<void> _deleteTask(DeleteTaskEvent event, Emitter<TaskState> emit) async {
     emit(const TaskState.deleteTasksLoading());
     final result = await deleteTask(DeleteTaskParam(
-      categoryTitle: categoryController.text,
-      taskTitle: taskTitleController.text,
+      categoryTitle: event.categoryTitle,
+      taskTitle: event.taskTitle,
     ));
     result.fold(
       (l) => emit(TaskState.deleteTaskError(l.message)),
@@ -80,7 +80,7 @@ class TasksBloc extends Bloc<TaskEvent, TaskState> {
   Future<void> _updateTask(UpdateTaskEvent event, Emitter<TaskState> emit) async {
     emit(const TaskState.updateTaskLoading());
     final result = await updateTask(UpdateTaskParam(
-      categoryTitle: categoryController.text,
+      categoryTitle: event.categoryTitle,
       oldTitle: event.oldTitle,
       update: updatedTitleController.text,
     ));

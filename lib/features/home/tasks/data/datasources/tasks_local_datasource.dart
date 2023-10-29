@@ -41,8 +41,10 @@ class TasksLocalDatasourceImpl implements TasksLocalDatasource {
       final existingCategory = await hiveService.readItem(key, HiveBoxNames.categories.name) as CategoryModel?;
       if (existingCategory != null) {
         debugPrint("found existing");
-        final updatedCategory = existingCategory.tasks.add(
-          TaskModel(uid: user!.uid, title: taskTitle, completed: false),
+        final updatedCategory = CategoryModel(
+          uid: user!.uid,
+          title: categoryTitle,
+          tasks: [...existingCategory.tasks, TaskModel(uid: user.uid, title: taskTitle, completed: false)],
         );
         await hiveService.saveItem(updatedCategory, HiveBoxNames.categories.name, key: key);
       } else {
@@ -75,11 +77,13 @@ class TasksLocalDatasourceImpl implements TasksLocalDatasource {
       if (existingCategory == null) {
         throw ApiFailure("Category not found");
       }
-      final category = CategoryModel.fromJson(existingCategory);
-      category.tasks.removeWhere((e) => e.title == taskTitle);
-      await hiveService.saveItem(category, HiveBoxNames.categories.name, key: key);
+      existingCategory.tasks.removeWhere((e) => e.title == taskTitle);
+      await hiveService.saveItem(existingCategory, HiveBoxNames.categories.name, key: key);
       return;
+    } on ApiFailure catch (e) {
+      throw ApiFailure(e.message);
     } catch (e) {
+      print(".............${(e as ApiFailure).message}............");
       throw ApiFailure(e.toString());
     }
   }
@@ -88,18 +92,8 @@ class TasksLocalDatasourceImpl implements TasksLocalDatasource {
   Future<List<dynamic>> fetchAllTasks() async {
     try {
       final categories = await hiveService.readAll(HiveBoxNames.categories.name);
-      // return categories
-      //     .map(
-      //       (e) => CategoryModel.fromJson({
-      //         "uid": e.uid,
-      //         "tasks": e.tasks,
-      //         "title": e.title,
-      //       }),
-      //     )
-      //     .toList();
       return categories;
     } catch (e) {
-      print(e.toString());
       throw ApiFailure(e.toString());
     }
   }
@@ -115,8 +109,9 @@ class TasksLocalDatasourceImpl implements TasksLocalDatasource {
       if (user?.uid == null) {
         throw ApiFailure("No user found");
       }
+
       final key = categoryTitle.replaceAll(" ", "");
-      final existingCategory = await hiveService.readItem(key, HiveBoxNames.categories.name) as CategoryModel?;
+      final existingCategory = await hiveService.readItem(key, HiveBoxNames.categories.name);
       if (existingCategory == null) {
         throw ApiFailure("Category not found");
       }

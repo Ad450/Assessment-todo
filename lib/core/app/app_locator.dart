@@ -15,6 +15,7 @@ import 'package:todo/features/home/tasks/data/usecases/update_task.dart';
 import 'package:todo/features/onboarding/auth/data/repository/auth_repository.dart';
 import 'package:todo/features/onboarding/auth/data/repository/auth_repository_impl.dart';
 import 'package:todo/features/onboarding/auth/data/usecases/check_auth_status.dart';
+import 'package:todo/features/onboarding/auth/data/usecases/logout.dart';
 import 'package:todo/features/onboarding/auth/data/usecases/singup_with_password.dart';
 import 'package:hive/hive.dart';
 import '../../features/home/tasks/data/datasources/tasks_local_datasource.dart';
@@ -46,6 +47,9 @@ void setupLocator() {
   );
   locator.registerLazySingleton<SignupWithEmailAndPassword>(
     () => SignupWithEmailAndPassword(locator.get<AuthRepository>()),
+  );
+  locator.registerLazySingleton<Logout>(
+    () => Logout(),
   );
 
   locator.registerLazySingleton<TasksLocalDatasource>(

@@ -12,8 +12,12 @@ import 'package:todo/features/home/tasks/screens/tile_details.dart';
 import 'package:todo/features/home/tasks/state/task_events.dart';
 import 'package:todo/features/home/tasks/state/tasks_bloc.dart';
 import 'package:todo/features/home/tasks/state/tasks_state.dart';
+import 'package:todo/features/onboarding/auth/state/auth_bloc.dart';
+import 'package:todo/features/onboarding/auth/state/auth_state.dart';
 import '../../../../core/presentation/widgets/todo_rounded_icon.dart';
 import '../../../../core/utils/helper_functions.dart';
+import '../../../onboarding/auth/state/auth_events.dart';
+import '../../../onboarding/start_up/start_up.dart';
 
 class TasksScreen extends StatefulWidget {
   const TasksScreen({super.key});
@@ -33,125 +37,165 @@ class _TasksScreenState extends State<TasksScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-        body: BlocConsumer<TasksBloc, TaskState>(
-      listener: (_, state) {
-        state.maybeMap(
-          orElse: () => {},
-          fetchTasksError: (state) => showToast(state.message),
-        );
-      },
-      builder: (_, state) => Padding(
-        padding: EdgeInsets.only(left: 20.w, right: 20.w, top: 60.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              "Hello,",
-              style: theme.textTheme.bodySmall,
-            ),
-            SizedBox(height: 10.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  // "Your\nProjects (4)",
-                  "Your\nProjects(${state.maybeMap(
-                    orElse: () => "",
-                    fetchTasksSuccess: (state) => state.categories.length.toString(),
-                  )})",
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    fontSize: 25,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                TodoRoundedIcon(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const AddTaskScreen(hasCategory: false),
-                      ),
-                    );
-                  },
-                  icon: const FaIcon(FontAwesomeIcons.plus),
-                  width: 60,
-                  backgroundColor: locator.get<AppTheme>().genericGrey,
-                ),
-              ],
-            ),
-            state.maybeMap(
-                orElse: () => const SizedBox(),
-                fetchTasksLoading: (_) => const CupertinoActivityIndicator(),
-                fetchTasksError: (state) => Expanded(
-                      child: RefreshIndicator(
-                        onRefresh: () async => context.read<TasksBloc>().add(FetchTaskEvent()),
-                        child: const SingleChildScrollView(),
-                      ),
+      body: BlocConsumer<TasksBloc, TaskState>(
+        listener: (_, state) {
+          state.maybeMap(
+            orElse: () => {},
+            fetchTasksError: (state) => showToast(state.message),
+          );
+        },
+        builder: (_, state) => Padding(
+          padding: EdgeInsets.only(left: 20.w, right: 20.w, top: 50.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              // Text(
+              //   "Hello,",
+              //   style: theme.textTheme.bodySmall,
+              // ),
+              // SizedBox(height: 10.h),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    // "Your\nProjects (4)",
+                    "Your\nProjects(${state.maybeMap(
+                      orElse: () => "",
+                      fetchTasksSuccess: (state) => state.categories.length.toString(),
+                    )})",
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontSize: 25,
+                      fontWeight: FontWeight.w600,
                     ),
-                fetchTasksSuccess: (state) => Expanded(
-                      child: ListView.builder(
-                        itemCount: state.categories.length,
-                        itemBuilder: (_, i) {
-                          debugPrint("${state.categories.length}");
-                          final categories = state.categories;
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              TodoTasksTile(
-                                isEven: i % 2 == 0,
-                                tileTapped: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => TileDetails(
-                                        isEven: i % 2 == 0,
-                                        category: categories[i],
-                                      ),
-                                    ),
-                                  );
-                                },
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 15.h),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        categories[i].title,
-                                        style: theme.textTheme.bodyLarge?.copyWith(
-                                          fontSize: 35,
-                                          fontWeight: FontWeight.w900,
-                                          color: locator.get<AppTheme>().genericWhiteColor,
+                  ),
+                  TodoRoundedIcon(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AddTaskScreen(hasCategory: false),
+                        ),
+                      );
+                    },
+                    icon: const FaIcon(FontAwesomeIcons.plus),
+                    width: 60,
+                    backgroundColor: locator.get<AppTheme>().genericGrey,
+                  ),
+                ],
+              ),
+              state.maybeMap(
+                  orElse: () => const SizedBox(),
+                  fetchTasksLoading: (_) => const CupertinoActivityIndicator(),
+                  fetchTasksError: (state) => Expanded(
+                        child: RefreshIndicator(
+                          onRefresh: () async => context.read<TasksBloc>().add(FetchTaskEvent()),
+                          child: const SingleChildScrollView(),
+                        ),
+                      ),
+                  fetchTasksSuccess: (state) => Expanded(
+                        child: ListView.builder(
+                          itemCount: state.categories.length,
+                          itemBuilder: (_, i) {
+                            debugPrint("${state.categories.length}");
+                            final categories = state.categories;
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                TodoTasksTile(
+                                  isEven: i % 2 == 0,
+                                  tileTapped: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => TileDetails(
+                                          isEven: i % 2 == 0,
+                                          category: categories[i],
                                         ),
                                       ),
-                                      SizedBox(height: 20.h),
-                                      TodoTasksPercentage(
-                                        completedTasks: categories[i].tasks.where((e) => e.completed == true).length,
-                                        total: categories[i].tasks.length,
-                                        indicatorColor:
-                                            i % 2 == 0 ? theme.colorScheme.onPrimary : theme.colorScheme.primary,
-                                      ),
-                                      SizedBox(height: 20.h),
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: <Widget>[
-                                          SizedBox(width: 50.w),
-                                          TodoRoundedIcon(onTap: () {}, icon: const FaIcon(FontAwesomeIcons.plus))
-                                        ],
-                                      )
-                                    ],
+                                    );
+                                  },
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 15.h),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          categories[i].title,
+                                          style: theme.textTheme.bodyLarge?.copyWith(
+                                            fontSize: 35,
+                                            fontWeight: FontWeight.w900,
+                                            color: locator.get<AppTheme>().genericWhiteColor,
+                                          ),
+                                        ),
+                                        SizedBox(height: 20.h),
+                                        TodoTasksPercentage(
+                                          completedTasks: categories[i].tasks.where((e) => e.completed == true).length,
+                                          total: categories[i].tasks.length,
+                                          indicatorColor:
+                                              i % 2 == 0 ? theme.colorScheme.onPrimary : theme.colorScheme.primary,
+                                        ),
+                                        SizedBox(height: 20.h),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: <Widget>[
+                                            SizedBox(width: 50.w),
+                                            TodoRoundedIcon(
+                                                onTap: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (_) => TileDetails(
+                                                        isEven: i % 2 == 0,
+                                                        category: categories[i],
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                                icon: const FaIcon(FontAwesomeIcons.listCheck))
+                                          ],
+                                        )
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(height: 15.h),
-                            ],
-                          );
-                        },
-                      ),
-                    ))
-          ],
+                                SizedBox(height: 15.h),
+                              ],
+                            );
+                          },
+                        ),
+                      ))
+            ],
+          ),
         ),
       ),
-    ));
+      floatingActionButton: BlocListener<AuthBloc, AuthState>(
+        listener: (_, state) {
+          if (state is UnauthenticatedState) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const Todo(),
+              ),
+              (route) => false,
+            );
+          }
+          if (state is AuthErrorState) {
+            showToast(state.error);
+          }
+        },
+        child: Tooltip(
+          message: "Click to logout",
+          child: TodoRoundedIcon(
+            onTap: () {
+              context.read<AuthBloc>().add(SignoutEvent());
+            },
+            icon: const FaIcon(
+              FontAwesomeIcons.arrowRightFromBracket,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
