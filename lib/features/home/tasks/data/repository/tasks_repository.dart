@@ -7,7 +7,7 @@ abstract class TasksRepository {
     String? description,
   });
   Future<void> deleteTasks({required String categoryTitle, required String taskTitle});
-  Future<List<CategoryModel>> fetchAllTasks();
+  Future<List<dynamic>> fetchAllTasks();
   Future<void> updateTask({required String categoryTitle, required String oldTaskTitle, required String update});
   Future<void> markTaskAsComplete({required String categoryTitle, required String taskTitle});
 }

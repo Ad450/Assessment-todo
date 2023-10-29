@@ -1,9 +1,6 @@
 import 'package:hive/hive.dart';
 
-enum HiveBoxNames {
-  categories,
-  tasks,
-}
+enum HiveBoxNames { categories, tasks, users }
 
 class HiveService {
   void deleteItem(key, String boxName) async {
@@ -11,11 +8,10 @@ class HiveService {
     await _box.delete(key);
   }
 
-  Future<List> readAll<T>(String boxName) async {
+  Future<List> readAll(String boxName) async {
     final _box = await _openBox(boxName);
     final values = _box.values;
     final converted = [];
-
     return converted..addAll(values);
   }
 
@@ -25,7 +21,7 @@ class HiveService {
     dynamic defaultValue,
   }) async {
     final box = await _openBox(boxName);
-    return box.get(key, defaultValue: defaultValue);
+    return await box.get(key, defaultValue: defaultValue);
   }
 
   Future<void> saveItem<T>(T item, String boxName, {key}) async {
@@ -38,12 +34,12 @@ class HiveService {
     box.clear();
   }
 
-  Future<Box> _openBox(String boxName) async {
-    Box box;
+  Future<Box<T>> _openBox<T>(String boxName) async {
+    Box<T> box;
     if (Hive.isBoxOpen(boxName)) {
-      box = Hive.box(boxName);
+      box = Hive.box<T>(boxName);
     } else {
-      box = await Hive.openBox(boxName);
+      box = await Hive.openBox<T>(boxName);
     }
     return box;
   }

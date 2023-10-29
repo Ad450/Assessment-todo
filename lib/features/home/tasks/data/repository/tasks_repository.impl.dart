@@ -2,10 +2,10 @@ import 'package:todo/core/app/app_usecase.dart';
 import 'package:todo/features/home/tasks/data/repository/tasks_repository.dart';
 
 import '../../../../../core/models/category_model.dart';
-import '../datasources/local_datasource.dart';
+import '../datasources/tasks_local_datasource.dart';
 
 class TasksRepositoryImpl implements TasksRepository {
-  final LocalDatasource localDatasource;
+  final TasksLocalDatasource localDatasource;
 
   TasksRepositoryImpl(this.localDatasource);
 
@@ -36,7 +36,7 @@ class TasksRepositoryImpl implements TasksRepository {
       );
 
   @override
-  Future<List<CategoryModel>> fetchAllTasks() async => await guardedApiCall(() => localDatasource.fetchAllTasks());
+  Future<List<dynamic>> fetchAllTasks() async => await guardedApiCall(() => localDatasource.fetchAllTasks());
 
   @override
   Future<void> updateTask({

@@ -1,29 +1,31 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:todo/core/models/category_model.dart';
 import 'package:todo/core/storage/hive.dart';
 
 import '../../../../../core/app/app_errors.dart';
 import '../../../../../core/models/task_model.dart';
 
-abstract class LocalDatasource {
+abstract class TasksLocalDatasource {
   Future<void> addTasks({
     required String categoryTitle,
     required String taskTitle,
     String? description,
   });
   Future<void> deleteTasks({required String categoryTitle, required String taskTitle});
-  Future<List<CategoryModel>> fetchAllTasks();
+  Future<List<dynamic>> fetchAllTasks();
   Future<void> updateTask({required String categoryTitle, required String oldTaskTitle, required String update});
   Future<void> markTaskAsComplete({
     required String categoryTitle,
     required String taskTitle,
   });
+  Future<void> deleteDummy();
 }
 
-class LocalDatasourceImpl implements LocalDatasource {
+class TasksLocalDatasourceImpl implements TasksLocalDatasource {
   final HiveService hiveService;
 
-  LocalDatasourceImpl(this.hiveService);
+  TasksLocalDatasourceImpl(this.hiveService);
   @override
   Future<void> addTasks({
     required String categoryTitle,
@@ -38,6 +40,7 @@ class LocalDatasourceImpl implements LocalDatasource {
       final key = categoryTitle.replaceAll(" ", "");
       final existingCategory = await hiveService.readItem(key, HiveBoxNames.categories.name) as CategoryModel?;
       if (existingCategory != null) {
+        debugPrint("found existing");
         final updatedCategory = existingCategory.tasks.add(
           TaskModel(uid: user!.uid, title: taskTitle, completed: false),
         );
@@ -53,6 +56,7 @@ class LocalDatasourceImpl implements LocalDatasource {
             )
           ]),
           HiveBoxNames.categories.name,
+          key: key,
         );
       }
       return;
@@ -67,22 +71,35 @@ class LocalDatasourceImpl implements LocalDatasource {
   Future<void> deleteTasks({required String categoryTitle, required String taskTitle}) async {
     try {
       final key = categoryTitle.replaceAll(" ", "");
-      final existingCategory = await hiveService.readItem(key, HiveBoxNames.categories.name) as CategoryModel?;
+      final existingCategory = await hiveService.readItem(key, HiveBoxNames.categories.name);
       if (existingCategory == null) {
         throw ApiFailure("Category not found");
       }
-      existingCategory.tasks.removeWhere((e) => e.title == taskTitle);
-      await hiveService.saveItem(existingCategory, HiveBoxNames.categories.name, key: key);
+      final category = CategoryModel.fromJson(existingCategory);
+      category.tasks.removeWhere((e) => e.title == taskTitle);
+      await hiveService.saveItem(category, HiveBoxNames.categories.name, key: key);
       return;
-    } catch (e) {}
+    } catch (e) {
+      throw ApiFailure(e.toString());
+    }
   }
 
   @override
-  Future<List<CategoryModel>> fetchAllTasks() async {
+  Future<List<dynamic>> fetchAllTasks() async {
     try {
       final categories = await hiveService.readAll(HiveBoxNames.categories.name);
-      return categories as List<CategoryModel>;
+      // return categories
+      //     .map(
+      //       (e) => CategoryModel.fromJson({
+      //         "uid": e.uid,
+      //         "tasks": e.tasks,
+      //         "title": e.title,
+      //       }),
+      //     )
+      //     .toList();
+      return categories;
     } catch (e) {
+      print(e.toString());
       throw ApiFailure(e.toString());
     }
   }
@@ -148,5 +165,11 @@ class LocalDatasourceImpl implements LocalDatasource {
     } catch (e) {
       throw ApiFailure(e.toString());
     }
+  }
+
+  @override
+  Future<void> deleteDummy() async {
+    await hiveService.deleteAll(HiveBoxNames.categories.name);
+    return;
   }
 }

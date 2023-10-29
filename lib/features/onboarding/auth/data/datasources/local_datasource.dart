@@ -32,6 +32,8 @@ class AuthLocalDatasourceImpl implements AuthLocalDatasource {
       return;
     } on FirebaseAuthException catch (e) {
       throw ApiFailure(e.code);
+    } on ApiFailure catch (e) {
+      throw ApiFailure(e.message);
     } catch (e) {
       throw ApiFailure(e.toString());
     }
@@ -40,8 +42,8 @@ class AuthLocalDatasourceImpl implements AuthLocalDatasource {
   @override
   Future<void> signupWithGoogle() async {
     try {
-      final userExits = await getCachedUser();
-      if (userExits != null) {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
         return;
       } else {
         final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
@@ -58,6 +60,8 @@ class AuthLocalDatasourceImpl implements AuthLocalDatasource {
         );
         return;
       }
+    } on ApiFailure catch (e) {
+      throw ApiFailure(e.message);
     } catch (e) {
       throw ApiFailure(e.toString());
     }
@@ -67,11 +71,13 @@ class AuthLocalDatasourceImpl implements AuthLocalDatasource {
   Future<String?> getCachedUser() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
-      if (user?.uid != null) {
+      if (user == null) {
         throw ApiFailure("user not found");
       }
-      final uid = await hiveService.readItem(user!.uid, HiveBoxNames.users.name);
+      final uid = await hiveService.readItem(user.uid, HiveBoxNames.users.name);
       return uid;
+    } on ApiFailure catch (e) {
+      throw ApiFailure(e.message);
     } catch (e) {
       throw ApiFailure(e.toString());
     }

@@ -28,7 +28,9 @@ class NoParam {
 Future<T> guardedApiCall<T>(Function func) async {
   try {
     return await func() as T;
-  } on DbFailure catch (e) {
-    throw ApiFailure(e.message);
+  } on ApiFailure catch (e) {
+    throw NetworkFailure(e.message);
+  } catch (e) {
+    throw NetworkFailure(e.toString());
   }
 }

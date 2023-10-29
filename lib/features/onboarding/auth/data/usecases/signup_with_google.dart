@@ -18,15 +18,3 @@ class SignupWithGoogle implements Usecase<VoidType, NoParam> {
     }
   }
 }
-
-class AddTaskParam {
-  final String categoryTitle;
-  final String taskTitle;
-  final String? description;
-
-  AddTaskParam({
-    required this.categoryTitle,
-    required this.description,
-    required this.taskTitle,
-  });
-}
