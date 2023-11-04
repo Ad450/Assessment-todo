@@ -20,8 +20,8 @@ class NoParam {
   const NoParam();
 }
 
-///[guardedApiCall] t wraps an API call to handle
-/// exceptions of type DbFailure.
+///[guardedApiCall] wraps an API call to handle
+/// exceptions of type ApiFailure.
 /// If the API call fails with an ApiFailure,
 ///it rethrows the exception as a ApiFailure
 
