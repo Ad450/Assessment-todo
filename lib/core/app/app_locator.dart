@@ -50,7 +50,7 @@ void setupLocator() {
     () => SignupWithEmailAndPassword(locator.get<AuthRepository>()),
   );
   locator.registerLazySingleton<Logout>(
-    () => Logout(),
+    () => Logout(locator.get<AuthRepository>()),
   );
 
   locator.registerLazySingleton<TasksLocalDatasource>(

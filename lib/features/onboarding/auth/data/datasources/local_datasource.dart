@@ -11,6 +11,7 @@ abstract class AuthLocalDatasource {
   });
   Future<void> signupWithGoogle();
   Future<String?> getCachedUser();
+  Future<void> logout();
 }
 
 class AuthLocalDatasourceImpl implements AuthLocalDatasource {
@@ -78,6 +79,17 @@ class AuthLocalDatasourceImpl implements AuthLocalDatasource {
       return uid;
     } on ApiFailure catch (e) {
       throw ApiFailure(e.message);
+    } catch (e) {
+      throw ApiFailure(e.toString());
+    }
+  }
+
+  @override
+  Future<void> logout() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      await hiveService.deleteAll(HiveBoxNames.categories.name);
+      return;
     } catch (e) {
       throw ApiFailure(e.toString());
     }

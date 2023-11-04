@@ -33,9 +33,10 @@ final authBloc = BlocProvider(
 
 final taskBloc = BlocProvider(
   create: (_) => TasksBloc(
-      addTask: locator.get<AddTasks>(),
-      deleteTask: locator.get<DeleteTask>(),
-      fetchAllTasks: locator.get<FetchAllTasks>(),
-      updateTask: locator.get<UpdateTask>(),
-      markTaskAsComplete: locator.get<MarkTaskAsComplete>()),
+    addTask: locator.get<AddTasks>(),
+    deleteTask: locator.get<DeleteTask>(),
+    fetchAllTasks: locator.get<FetchAllTasks>(),
+    updateTask: locator.get<UpdateTask>(),
+    markTaskAsComplete: locator.get<MarkTaskAsComplete>(),
+  ),
 );

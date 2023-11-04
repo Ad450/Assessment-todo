@@ -49,16 +49,10 @@ class _TasksScreenState extends State<TasksScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              // Text(
-              //   "Hello,",
-              //   style: theme.textTheme.bodySmall,
-              // ),
-              // SizedBox(height: 10.h),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    // "Your\nProjects (4)",
                     "Your\nProjects(${state.maybeMap(
                       orElse: () => "",
                       fetchTasksSuccess: (state) => state.categories.length.toString(),
@@ -84,87 +78,88 @@ class _TasksScreenState extends State<TasksScreen> {
                 ],
               ),
               state.maybeMap(
-                  orElse: () => const SizedBox(),
-                  fetchTasksLoading: (_) => const CupertinoActivityIndicator(),
-                  fetchTasksError: (state) => Expanded(
-                        child: RefreshIndicator(
-                          onRefresh: () async => context.read<TasksBloc>().add(FetchTaskEvent()),
-                          child: const SingleChildScrollView(),
-                        ),
-                      ),
-                  fetchTasksSuccess: (state) => Expanded(
-                        child: ListView.builder(
-                          itemCount: state.categories.length,
-                          itemBuilder: (_, i) {
-                            debugPrint("${state.categories.length}");
-                            final categories = state.categories;
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                TodoTasksTile(
-                                  isEven: i % 2 == 0,
-                                  tileTapped: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => TileDetails(
-                                          isEven: i % 2 == 0,
-                                          category: categories[i],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 15.h),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          categories[i].title,
-                                          style: theme.textTheme.bodyLarge?.copyWith(
-                                            fontSize: 35,
-                                            fontWeight: FontWeight.w900,
-                                            color: locator.get<AppTheme>().genericWhiteColor,
-                                          ),
-                                        ),
-                                        SizedBox(height: 20.h),
-                                        TodoTasksPercentage(
-                                          completedTasks: categories[i].tasks.where((e) => e.completed == true).length,
-                                          total: categories[i].tasks.length,
-                                          indicatorColor:
-                                              i % 2 == 0 ? theme.colorScheme.onPrimary : theme.colorScheme.primary,
-                                        ),
-                                        SizedBox(height: 20.h),
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: <Widget>[
-                                            SizedBox(width: 50.w),
-                                            TodoRoundedIcon(
-                                                onTap: () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (_) => TileDetails(
-                                                        isEven: i % 2 == 0,
-                                                        category: categories[i],
-                                                      ),
-                                                    ),
-                                                  );
-                                                },
-                                                icon: const FaIcon(FontAwesomeIcons.listCheck))
-                                          ],
-                                        )
-                                      ],
-                                    ),
+                orElse: () => const SizedBox(),
+                fetchTasksLoading: (_) => const CupertinoActivityIndicator(),
+                fetchTasksError: (state) => Expanded(
+                  child: RefreshIndicator(
+                    onRefresh: () async => context.read<TasksBloc>().add(FetchTaskEvent()),
+                    child: const SingleChildScrollView(),
+                  ),
+                ),
+                fetchTasksSuccess: (state) => Expanded(
+                  child: ListView.builder(
+                    itemCount: state.categories.length,
+                    itemBuilder: (_, i) {
+                      debugPrint("${state.categories.length}");
+                      final categories = state.categories;
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          TodoTasksTile(
+                            isEven: i % 2 == 0,
+                            tileTapped: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => TileDetails(
+                                    isEven: i % 2 == 0,
+                                    category: categories[i],
                                   ),
                                 ),
-                                SizedBox(height: 15.h),
-                              ],
-                            );
-                          },
-                        ),
-                      ))
+                              );
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 15.h),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    categories[i].title,
+                                    style: theme.textTheme.bodyLarge?.copyWith(
+                                      fontSize: 35,
+                                      fontWeight: FontWeight.w900,
+                                      color: locator.get<AppTheme>().genericWhiteColor,
+                                    ),
+                                  ),
+                                  SizedBox(height: 20.h),
+                                  TodoTasksPercentage(
+                                    completedTasks: categories[i].tasks.where((e) => e.completed == true).length,
+                                    total: categories[i].tasks.length,
+                                    indicatorColor:
+                                        i % 2 == 0 ? theme.colorScheme.onPrimary : theme.colorScheme.primary,
+                                  ),
+                                  SizedBox(height: 20.h),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: <Widget>[
+                                      SizedBox(width: 50.w),
+                                      TodoRoundedIcon(
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) => TileDetails(
+                                                  isEven: i % 2 == 0,
+                                                  category: categories[i],
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                          icon: const FaIcon(FontAwesomeIcons.listCheck))
+                                    ],
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 15.h),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              )
             ],
           ),
         ),

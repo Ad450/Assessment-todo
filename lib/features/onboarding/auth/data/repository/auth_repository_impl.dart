@@ -25,4 +25,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> signupWithGoogle() async => await guardedApiCall(
         () => authLocalDatasource.signupWithGoogle(),
       );
+
+  @override
+  Future<void> logout() async => await guardedApiCall(() => authLocalDatasource.logout());
 }

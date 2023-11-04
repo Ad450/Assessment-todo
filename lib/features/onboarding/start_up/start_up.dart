@@ -47,9 +47,6 @@ class _TodoStartup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(listener: (_, state) {
-      if (state is AuthErrorState) {
-        showToast(state.error);
-      }
     }, builder: (_, state) {
       switch (state.runtimeType) {
         case UnauthenticatedState:

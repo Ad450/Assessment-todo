@@ -5,4 +5,5 @@ abstract class AuthRepository {
   });
   Future<void> signupWithGoogle();
   Future<String?> getCachedUser();
+  Future<void> logout();
 }

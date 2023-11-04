@@ -50,6 +50,8 @@ class TasksBloc extends Bloc<TaskEvent, TaskState> {
         }
       },
     );
+    categoryController.clear();
+    taskTitleController.clear();
   }
 
   Future<void> _addTaskToOldCategory(AddToOldCategoryEvent event, Emitter<TaskState> emit) async {
@@ -61,8 +63,9 @@ class TasksBloc extends Bloc<TaskEvent, TaskState> {
     ));
     result.fold(
       (l) => emit(TaskState.addToOldCategoryError(message: l.message)),
-      (r) => emit(TaskState.addToOldCategorySuccess()),
+      (r) => emit(const TaskState.addToOldCategorySuccess()),
     );
+    taskTitleController.clear();
   }
 
   Future<void> _deleteTask(DeleteTaskEvent event, Emitter<TaskState> emit) async {
@@ -88,6 +91,7 @@ class TasksBloc extends Bloc<TaskEvent, TaskState> {
       (l) => emit(TaskState.updateTaskError(l.message)),
       (r) => emit(const TaskState.updateTaskSuccess()),
     );
+    updatedTitleController.clear();
   }
 
   Future<void> _fetchAllTask(FetchTaskEvent event, Emitter<TaskState> emit) async {
